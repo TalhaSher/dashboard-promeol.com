@@ -1,5 +1,4 @@
-import { useState, useCallback } from 'react';
-
+import { useState, FC } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -9,30 +8,50 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
-import { _users } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
-
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
-
 import { TableNoData } from '../table-no-data';
 import { UserTableRow } from '../user-table-row';
 import { UserTableHead } from '../user-table-head';
 import { TableEmptyRows } from '../table-empty-rows';
 import { UserTableToolbar } from '../user-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
+import { NewEmployeeForm } from '../new-employee-form';
 
-import type { UserProps } from '../user-table-row';
+// Types
+interface Employee {
+  id: number;
+  name: string;
+  description: string;
+  role: string;
+  linkedin: string;
+  github: string;
+  x: string;
+  picture: string;
+}
 
-// ----------------------------------------------------------------------
-
-export function UserView() {
+export const UserView: FC = () => {
   const table = useTable();
+  const [filterName, setFilterName] = useState<string>('');
+  const [employees, setEmployees] = useState<Employee[]>([]); // Start with an empty list
+  const [open, setOpen] = useState<boolean>(false);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
-  const [filterName, setFilterName] = useState('');
+  const handleAddEmployee = (newEmployee: Employee) => {
+    setEmployees((prev) => [...prev, newEmployee]);
+    setOpen(false);
+  };
 
-  const dataFiltered: UserProps[] = applyFilter({
-    inputData: _users,
+  const handleEditEmployee = (updatedEmployee: Employee) => {
+    setEmployees((prev) =>
+      prev.map((emp) => (emp.id === updatedEmployee.id ? updatedEmployee : emp))
+    );
+    setEditingEmployee(null);
+  };
+
+  const dataFiltered = applyFilter({
+    inputData: employees,
     comparator: getComparator(table.order, table.orderBy),
     filterName,
   });
@@ -49,42 +68,53 @@ export function UserView() {
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={() => {
+            setEditingEmployee(null); // Clear editing state for new entry
+            setOpen(true);
+          }}
         >
-          New employee
+          New Employee
         </Button>
       </Box>
+
+      <NewEmployeeForm
+        open={open}
+        onClose={() => setOpen(false)}
+        onAddEmployee={editingEmployee ? handleEditEmployee : handleAddEmployee}
+        employee={editingEmployee}
+      />
 
       <Card>
         <UserTableToolbar
           numSelected={table.selected.length}
           filterName={filterName}
-          onFilterName={(event: React.ChangeEvent<HTMLInputElement>) => {
+          onFilterName={(event) => {
             setFilterName(event.target.value);
             table.onResetPage();
           }}
         />
-
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
             <Table sx={{ minWidth: 800 }}>
               <UserTableHead
                 order={table.order}
                 orderBy={table.orderBy}
-                rowCount={_users.length}
+                rowCount={employees.length}
                 numSelected={table.selected.length}
                 onSort={table.onSort}
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
-                    _users.map((user) => user.id)
+                    employees.map((user) => user.name)
                   )
                 }
                 headLabel={[
                   { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
+                  { id: 'description', label: 'Description' },
                   { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
-                  { id: 'status', label: 'Status' },
+                  { id: 'linkedin', label: 'LinkedIn', align: 'center' },
+                  { id: 'github', label: 'GitHub', align: 'center' },
+                  { id: 'x', label: 'X Profile', align: 'center' },
                   { id: '' },
                 ]}
               />
@@ -98,14 +128,18 @@ export function UserView() {
                     <UserTableRow
                       key={row.id}
                       row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
+                      selected={table.selected.includes(row.name)}
+                      onSelectRow={() => table.onSelectRow(row.name)}
+                      onEdit={() => {
+                        setEditingEmployee(row); // Set employee to edit
+                        setOpen(true); // Open the form for editing
+                      }}
                     />
                   ))}
 
                 <TableEmptyRows
                   height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, _users.length)}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, employees.length)}
                 />
 
                 {notFound && <TableNoData searchQuery={filterName} />}
@@ -117,7 +151,7 @@ export function UserView() {
         <TablePagination
           component="div"
           page={table.page}
-          count={_users.length}
+          count={employees.length}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           rowsPerPageOptions={[5, 10, 25]}
@@ -126,7 +160,7 @@ export function UserView() {
       </Card>
     </DashboardContent>
   );
-}
+};
 
 // ----------------------------------------------------------------------
 
@@ -137,49 +171,40 @@ export function useTable() {
   const [selected, setSelected] = useState<string[]>([]);
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
 
-  const onSort = useCallback(
-    (id: string) => {
-      const isAsc = orderBy === id && order === 'asc';
-      setOrder(isAsc ? 'desc' : 'asc');
-      setOrderBy(id);
-    },
-    [order, orderBy]
-  );
+  const onSort = (id: string) => {
+    const isAsc = orderBy === id && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(id);
+  };
 
-  const onSelectAllRows = useCallback((checked: boolean, newSelecteds: string[]) => {
+  const onSelectAllRows = (checked: boolean, newSelecteds: string[]) => {
     if (checked) {
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
-  }, []);
+  };
 
-  const onSelectRow = useCallback(
-    (inputValue: string) => {
-      const newSelected = selected.includes(inputValue)
-        ? selected.filter((value) => value !== inputValue)
-        : [...selected, inputValue];
+  const onSelectRow = (inputValue: string) => {
+    const newSelected = selected.includes(inputValue)
+      ? selected.filter((value) => value !== inputValue)
+      : [...selected, inputValue];
 
-      setSelected(newSelected);
-    },
-    [selected]
-  );
+    setSelected(newSelected);
+  };
 
-  const onResetPage = useCallback(() => {
+  const onResetPage = () => {
     setPage(0);
-  }, []);
+  };
 
-  const onChangePage = useCallback((event: unknown, newPage: number) => {
+  const onChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
-  }, []);
+  };
 
-  const onChangeRowsPerPage = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setRowsPerPage(parseInt(event.target.value, 10));
-      onResetPage();
-    },
-    [onResetPage]
-  );
+  const onChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    onResetPage();
+  };
 
   return {
     page,

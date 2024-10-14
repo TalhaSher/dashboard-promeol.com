@@ -32,5 +32,10 @@ export const navData = [
     title: 'Blog',
     path: '/blog',
     icon: icon('ic-blog'),
+  },
+  {
+    title: 'Website',
+    path: '/website',
+    icon: icon('ic-blog'),
   }
 ];
