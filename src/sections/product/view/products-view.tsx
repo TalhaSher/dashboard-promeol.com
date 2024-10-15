@@ -7,10 +7,10 @@ import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
 import { _products } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { Iconify } from 'src/components/iconify';
 import { ProductItem } from '../product-item';
 import { CartIcon } from '../product-cart-widget';
 import { ProductFilters } from '../product-filters';
-import { Iconify } from 'src/components/iconify';
 import NewProductForm from '../new-product-form';
 
 // ----------------------------------------------------------------------
@@ -26,7 +26,7 @@ const defaultFilters = {
 export function ProductsView() {
   const [openModal, setOpenModal] = useState(false);
 
-  const handleAddProduct = (newProduct) => {
+  const handleAddProduct = (newProduct: any) => {
     console.log('New Product Added:', newProduct);
     // Logic to add the new product to the existing products array or state
     setOpenModal(false); // Close the modal after adding

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Grid, MenuItem } from '@mui/material';
 
-const NewProductForm = ({ onAddProduct }:any) => {
+const NewProductForm = ({ onAddProduct }: any) => {
   const [productName, setProductName] = useState('');
   const [status, setStatus] = useState('prod');
   const [description1, setDescription1] = useState('');
