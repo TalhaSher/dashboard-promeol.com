@@ -47,7 +47,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ open, onClose, product }) =
           <strong>Status:</strong> {product.status}
         </Typography>
         {/* Video Section */}
-        
+
         <Box
           sx={{
             width: '100%',

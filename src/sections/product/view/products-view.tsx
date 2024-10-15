@@ -14,7 +14,19 @@ import { ProductFilters } from '../product-filters';
 import NewProductForm from '../new-product-form';
 
 // ----------------------------------------------------------------------
-
+const dummy = [
+  {
+    productName: 'Super Widget',
+    status: 'prod',
+    description1:
+      'The Super Widget is a revolutionary product that streamlines your workflow and increases productivity.',
+    description2:
+      'Designed with user experience in mind, the Super Widget integrates seamlessly with existing systems.',
+    technicalInfo:
+      'Specifications: \n - Weight: 1.2 kg \n - Dimensions: 15x10x5 cm \n - Compatible with: Windows, Mac, Linux',
+    youtubeLink: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  },
+];
 const defaultFilters = {
   price: '',
   gender: ['men'],
@@ -49,8 +61,8 @@ export function ProductsView() {
       </Box>
 
       <Grid container spacing={3}>
-        {_products.map((product) => (
-          <Grid key={product.id} xs={12} sm={6} md={3}>
+        {dummy.map((product) => (
+          <Grid key={product.productName} xs={12} sm={6} md={3}>
             <ProductItem product={product} />
           </Grid>
         ))}

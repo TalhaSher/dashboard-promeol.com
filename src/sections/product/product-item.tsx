@@ -9,28 +9,16 @@ import { Label } from 'src/components/label';
 import { ColorPreview } from 'src/components/color-utils';
 import ProductModal from './product-modal';
 
-export type ProductItemProps = {
-  id: string;
-  name: string;
-  price: number;
-  status: string;
-  coverUrl: string;
-  colors: string[];
-  priceSale: number | null;
-};
-const dummy = {
-  productName: 'Super Widget',
-  status: 'prod',
-  description1:
-    'The Super Widget is a revolutionary product that streamlines your workflow and increases productivity.',
-  description2:
-    'Designed with user experience in mind, the Super Widget integrates seamlessly with existing systems.',
-  technicalInfo:
-    'Specifications: \n - Weight: 1.2 kg \n - Dimensions: 15x10x5 cm \n - Compatible with: Windows, Mac, Linux',
-  youtubeLink: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-};
+export interface Product {
+  productName: string; // Name of the product
+  status: string; // Status of the product, restricted to specific values
+  description1: string; // First description paragraph
+  description2: string; // Second description paragraph
+  technicalInfo: string; // Technical specifications of the product
+  youtubeLink: string; // Link to a YouTube video related to the product
+}
 
-export function ProductItem({ product }: { product: ProductItemProps }) {
+export function ProductItem({ product }: { product: Product }) {
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleOpen = () => setModalOpen(true);
@@ -52,24 +40,27 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
     </Label>
   );
 
-  const renderImg = (
-    <Box
-      component="img"
-      alt={product.name}
-      src={product.coverUrl}
-      sx={{
-        top: 0,
-        width: 1,
-        height: 1,
-        objectFit: 'cover',
-        position: 'absolute',
-      }}
-    />
+  const renderVideo = (
+    
+      <iframe
+        src={product.youtubeLink.replace("watch?v=", "embed/")}
+        title={product.productName}
+        frameBorder="0"
+        allowFullScreen
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+        }}
+      />
   );
 
   const renderPrice = (
     <Typography variant="subtitle1">
-      <Typography
+      {/* Assuming price and priceSale are properties of Product, you can modify accordingly */}
+      {/* <Typography
         component="span"
         variant="body1"
         sx={{
@@ -79,8 +70,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
       >
         {product.priceSale && fCurrency(product.priceSale)}
       </Typography>
-      &nbsp;
-      {fCurrency(product.price)}
+      &nbsp; */}
     </Typography>
   );
 
@@ -89,21 +79,18 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
       <Card onClick={handleOpen} sx={{ cursor: 'pointer' }}>
         <Box sx={{ pt: '100%', position: 'relative' }}>
           {product.status && renderStatus}
-          {renderImg}
+          {renderVideo} {/* Display the embedded video here */}
         </Box>
 
         <Stack spacing={2} sx={{ p: 3 }}>
           <Link color="inherit" underline="hover" variant="subtitle2" noWrap>
-            {product.name}
+            {product.productName}
           </Link>
-          <Box display="flex" alignItems="center" justifyContent="space-between">
-            <ColorPreview colors={product.colors} />
-            {renderPrice}
-          </Box>
+          
         </Stack>
       </Card>
 
-      <ProductModal open={modalOpen} onClose={handleClose} product={dummy} />
+      <ProductModal open={modalOpen} onClose={handleClose} product={product} />
     </>
   );
 }
