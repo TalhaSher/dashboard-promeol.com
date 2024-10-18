@@ -24,7 +24,12 @@ interface Employee {
   picture: string;
 }
 
-export const NewEmployeeForm: FC<NewEmployeeFormProps> = ({ open, onClose, onAddEmployee, employee }) => {
+export const NewEmployeeForm: FC<NewEmployeeFormProps> = ({
+  open,
+  onClose,
+  onAddEmployee,
+  employee,
+}) => {
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [role, setRole] = useState<string>('');
@@ -65,7 +70,7 @@ export const NewEmployeeForm: FC<NewEmployeeFormProps> = ({ open, onClose, onAdd
       picture,
     };
 
-    onAddEmployee(newEmployee);
+    console.log(newEmployee);
     onClose();
   };
 
