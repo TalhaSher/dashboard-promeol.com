@@ -1,4 +1,4 @@
-import { useState, FC } from 'react';
+import { useState, FC, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -7,6 +7,7 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
+import axios from 'axios';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
@@ -18,6 +19,7 @@ import { TableEmptyRows } from '../table-empty-rows';
 import { UserTableToolbar } from '../user-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 import { NewEmployeeForm } from '../new-employee-form';
+import toast from 'react-hot-toast';
 
 // Types
 interface Employee {
@@ -38,16 +40,41 @@ export const UserView: FC = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
+  useEffect(() => {
+    axios.get('/getEmployees').then((res) => {
+      setEmployees(res.data.employees);
+    });
+  }, []);
+
   const handleAddEmployee = (newEmployee: Employee) => {
-    setEmployees((prev) => [...prev, newEmployee]);
-    setOpen(false);
+    axios
+      .post('/addEmployee', newEmployee)
+      .then((res) => {
+        toast.success(res.data.message); // Notify user of success
+        setEmployees((prev) => [...prev, newEmployee]); // Add new employee to state
+        setOpen(false); // Close the dialog
+      })
+      .catch((err) => {
+        toast.error('Failed to add employee. Please try again.'); // Notify user of failure
+        console.error(err);
+      });
   };
 
   const handleEditEmployee = (updatedEmployee: Employee) => {
-    setEmployees((prev) =>
-      prev.map((emp) => (emp.id === updatedEmployee.id ? updatedEmployee : emp))
-    );
-    setEditingEmployee(null);
+    axios
+      .put('/updateEmployee', updatedEmployee)
+      .then((res) => {
+        toast.success(res.data.message);
+        setEmployees((prev) =>
+          prev.map((emp) => (emp.id === updatedEmployee.id ? res.data.employee : emp))
+        );
+        setEditingEmployee(null);
+        setOpen(false);
+      })
+      .catch((err) => {
+        toast.error('Failed to update employee. Please try again.');
+        console.error(err);
+      });
   };
 
   const dataFiltered = applyFilter({

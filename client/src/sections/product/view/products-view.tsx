@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Unstable_Grid2';
 import Pagination from '@mui/material/Pagination';
@@ -12,21 +12,9 @@ import { ProductItem } from '../product-item';
 import { CartIcon } from '../product-cart-widget';
 import { ProductFilters } from '../product-filters';
 import NewProductForm from '../new-product-form';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
-// ----------------------------------------------------------------------
-const dummy = [
-  {
-    productName: 'Super Widget',
-    status: 'prod',
-    description1:
-      'The Super Widget is a revolutionary product that streamlines your workflow and increases productivity.',
-    description2:
-      'Designed with user experience in mind, the Super Widget integrates seamlessly with existing systems.',
-    technicalInfo:
-      'Specifications: \n - Weight: 1.2 kg \n - Dimensions: 15x10x5 cm \n - Compatible with: Windows, Mac, Linux',
-    youtubeLink: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-  },
-];
 const defaultFilters = {
   price: '',
   gender: ['men'],
@@ -38,9 +26,37 @@ const defaultFilters = {
 export function ProductsView() {
   const [openModal, setOpenModal] = useState(false);
 
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('/getProducts');
+      setProducts(response.data.products);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast.error('Failed to fetch products. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
   const handleAddProduct = (newProduct: any) => {
-    console.log('New Product Added:', newProduct);
-    // Logic to add the new product to the existing products array or state
+    axios
+      .post('/addProduct', newProduct)
+      .then((res) => {
+        console.log(res.data.message);
+        toast.success('Product added successfully!');
+      })
+      .catch((error) => {
+        console.error('Error adding product:', error);
+        toast.error('Failed to add product. Please try again.');
+      });
+
     setOpenModal(false); // Close the modal after adding
   };
 
@@ -61,7 +77,7 @@ export function ProductsView() {
       </Box>
 
       <Grid container spacing={3}>
-        {dummy.map((product) => (
+        {products.map((product) => (
           <Grid key={product.productName} xs={12} sm={6} md={3}>
             <ProductItem product={product} />
           </Grid>

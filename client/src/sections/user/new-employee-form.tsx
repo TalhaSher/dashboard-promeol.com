@@ -58,7 +58,7 @@ export const NewEmployeeForm: FC<NewEmployeeFormProps> = ({
     }
   }, [employee]);
 
-  const handleSubmit = () => {
+  const handleFormSubmit = () => {
     const newEmployee: Employee = {
       id: employee ? employee.id : Date.now(), // Generate a new ID
       name,
@@ -70,8 +70,7 @@ export const NewEmployeeForm: FC<NewEmployeeFormProps> = ({
       picture,
     };
 
-    console.log(newEmployee);
-    onClose();
+    onAddEmployee(newEmployee);
   };
 
   return (
@@ -133,7 +132,7 @@ export const NewEmployeeForm: FC<NewEmployeeFormProps> = ({
         <Button onClick={onClose} color="primary">
           Cancel
         </Button>
-        <Button onClick={handleSubmit} color="primary">
+        <Button onClick={handleFormSubmit} color="primary">
           {employee ? 'Update' : 'Add'}
         </Button>
       </DialogActions>

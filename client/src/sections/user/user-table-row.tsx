@@ -9,6 +9,8 @@ import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 import { Iconify } from 'src/components/iconify';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 // ----------------------------------------------------------------------
 
@@ -32,14 +34,35 @@ type UserTableRowProps = {
 
 export function UserTableRow({ row, selected, onSelectRow, onEdit }: UserTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
+  const [refresh, setRefresh] = useState(false);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
   }, []);
 
-  const handleClosePopover = useCallback(() => {
-    setOpenPopover(null);
-  }, []);
+  const handleClosePopover = () => {
+    setOpenPopover(null); // Only close the popover, not trigger delete
+  };
+
+  const handleDelete = () => {
+    const employee = {
+      id: row.id,
+    };
+
+    axios
+      .delete('/deleteEmployee', { data: employee })
+      .then((response) => {
+        console.log('Employee deleted:', response.data.message);
+        toast.success('Employee deleted successfully!');
+        setRefresh((prev) => !prev); // Refresh state after deletion
+      })
+      .catch((error) => {
+        console.error('Error deleting employee:', error);
+        toast.error('Failed to delete employee. Please try again.');
+      });
+
+    handleClosePopover(); // Close the popover after the delete action
+  };
 
   return (
     <>
@@ -68,7 +91,6 @@ export function UserTableRow({ row, selected, onSelectRow, onEdit }: UserTableRo
           </IconButton>
         </TableCell>
       </TableRow>
-
       <Popover
         open={!!openPopover}
         anchorEl={openPopover}
@@ -92,12 +114,17 @@ export function UserTableRow({ row, selected, onSelectRow, onEdit }: UserTableRo
             },
           }}
         >
-          <MenuItem onClick={() => { handleClosePopover(); onEdit(); }}>
+          <MenuItem
+            onClick={() => {
+              handleClosePopover();
+              onEdit();
+            }}
+          >
             <Iconify icon="solar:pen-bold" />
             Edit
           </MenuItem>
 
-          <MenuItem onClick={handleClosePopover} sx={{ color: 'error.main' }}>
+          <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
             <Iconify icon="solar:trash-bin-trash-bold" />
             Delete
           </MenuItem>

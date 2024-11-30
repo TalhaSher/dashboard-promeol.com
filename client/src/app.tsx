@@ -10,9 +10,16 @@ import { ThemeProvider } from 'src/theme/theme-provider';
 
 import { Iconify } from 'src/components/iconify';
 
+import axios from 'axios';
+
+import { Toaster } from 'react-hot-toast';
+
 // ----------------------------------------------------------------------
 
 export default function App() {
+  axios.defaults.baseURL = 'http://localhost:1337';
+  axios.defaults.withCredentials = true;
+
   useScrollToTop();
 
   const githubButton = (
@@ -37,6 +44,7 @@ export default function App() {
 
   return (
     <ThemeProvider>
+      <Toaster />
       <Router />
       {githubButton}
     </ThemeProvider>
